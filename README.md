@@ -1,1 +1,1 @@
-Link documentation: (ristek.link/DocumentationTaskPARKEE)
+Link documentation: ristek.link/DocumentationTaskPARKEE
