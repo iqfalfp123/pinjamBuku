@@ -2,7 +2,9 @@ package perpustakaan.pinjamBuku.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import perpustakaan.pinjamBuku.DTO.PeminjamDTO;
 import perpustakaan.pinjamBuku.DTO.PinjamDTO;
+import perpustakaan.pinjamBuku.DTO.PinjamNewDataDTO;
 import perpustakaan.pinjamBuku.model.BukuModel;
 import perpustakaan.pinjamBuku.model.PeminjamModel;
 import perpustakaan.pinjamBuku.model.PinjamModel;
@@ -40,7 +42,10 @@ public class PinjamServiceImpl implements PinjamService{
             response = "Peminjam sedang melakukan peminjaman buku";
         }else if(daysBetween > 30){
                 response = "Peminjam tidak boleh meminjam buku lebih lama dari 30 (tiga puluh) hari";
-        }else{
+        }else if(pinjamDTO.getDeadlinePengembalian().isBefore(LocalDate.now())){
+            response = "Masukkan deadline pengembalian buku yang valid!";
+        }
+        else{
             PinjamModel pinjam = new PinjamModel();
             pinjam.setPeminjam(peminjam);
             pinjam.setWaktuPinjam(LocalDate.now());
@@ -85,6 +90,47 @@ public class PinjamServiceImpl implements PinjamService{
                 response = peminjam.getNamaPeminjam() + " berhasil mengembalikan buku dengan judul "
                         + buku.getJudulBuku() + status;
             }
+        }
+        return response;
+    }
+    public String addPinjamNewPeminjam(PinjamNewDataDTO pinjam) {
+        PeminjamModel peminjam = new PeminjamModel();
+        if(peminjamDb.findByNoKTP(pinjam.getNomorKTP()) == null) {
+            peminjam.setNamaPeminjam(pinjam.getNamaPeminjam());
+            peminjam.setNoKTP(pinjam.getNomorKTP());
+            peminjam.setEmail(pinjam.getEmail());
+            peminjam.setStatusPinjam(false);
+        }
+        else {
+            peminjam = peminjamDb.findByNoKTP(pinjam.getNomorKTP());
+        }
+        BukuModel buku = bukuDb.findByNoISBN(pinjam.getNomorISBN());
+        String response ="";
+        long daysBetween = DAYS.between(LocalDate.now(), pinjam.getDeadlinePengembalian());
+        if (buku == null){
+            response = "buku tidak tersedia";
+        }else if (buku.getStok() == 0) {
+            response = "stok buku habis";
+        }else if (peminjam.getStatusPinjam() == true) {
+            response = "Peminjam sedang melakukan peminjaman buku";
+        }else if(daysBetween > 30){
+            response = "Peminjam tidak boleh meminjam buku lebih lama dari 30 (tiga puluh) hari";
+        }else if(pinjam.getDeadlinePengembalian().isBefore(LocalDate.now())){
+            response = "Masukkan deadline pengembalian buku yang valid!";
+        }
+        else{
+            peminjamDb.save(peminjam);
+            PinjamModel newPinjam = new PinjamModel();
+            newPinjam.setPeminjam(peminjam);
+            newPinjam.setWaktuPinjam(LocalDate.now());
+            newPinjam.setBuku(buku);
+            newPinjam.setStatusPengembalian(false);
+            newPinjam.setWaktuPengembalian(LocalDate.now());
+            newPinjam.setDeadlinePengambalian(pinjam.getDeadlinePengembalian());
+            buku.setStok(buku.getStok() - 1);
+            peminjam.setStatusPinjam(true);
+            pinjamDb.save(newPinjam);
+            response = "peminjaman buku " + buku.getJudulBuku() + " berhasil";
         }
         return response;
     }

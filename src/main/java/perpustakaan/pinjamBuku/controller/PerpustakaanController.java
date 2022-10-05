@@ -42,18 +42,8 @@ public class PerpustakaanController {
                     HttpStatus.BAD_REQUEST, "Request Body has invalid type or missing field");
         } else {
             try {
-                PeminjamDTO peminjamDTO = new PeminjamDTO();
-                peminjamDTO.setNamaPeminjam(pinjam.getNamaPeminjam());
-                peminjamDTO.setNoKTP(pinjam.getNomorKTP());
-                peminjamDTO.setEmail(pinjam.getEmail());
-                PinjamDTO pinjamDTO = new PinjamDTO();
-                pinjamDTO.setNomorKTP(pinjam.getNomorKTP());
-                pinjamDTO.setNomorISBN(pinjam.getNomorISBN());
-                pinjamDTO.setDeadlinePengembalian(pinjam.getDeadlinePengembalian());
-                PeminjamModel newPeminjam = peminjamService.addPeminjam(peminjamDTO);
-                String newPinjam = pinjamService.addPinjam(pinjamDTO);
-                response.setMessage("success");
-                response.setResult(newPinjam);
+                String newPinjam = pinjamService.addPinjamNewPeminjam(pinjam);
+                response.setMessage(newPinjam);
             } catch (Exception e) {
                 response.setStatus(400);
                 response.setMessage(e.toString());
