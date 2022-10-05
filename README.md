@@ -2,12 +2,13 @@ API untuk menambahkan data buku
 **URL**: http://localhost:8080/api/perpustakaan/add-buku
 **METHOD**: POST
 **JSON FORMAT**:
+'''
 {
     "judulBuku": "Madilog",
     "noISBN": "112234KJ9443N",
     "stok": 100
     }
- 
+''' 
 API untuk update data buku
 **URL**: http://localhost:8080/api/perpustakaan/update-data-buku
 **METHOD**: PUT
